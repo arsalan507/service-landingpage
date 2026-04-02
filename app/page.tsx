@@ -22,24 +22,21 @@ export default function Home() {
       {/* Aurora Background */}
       <AuroraBackground />
 
-      {/* Grain Overlay */}
-      <div className="grain" />
-
       {/* Navigation */}
       <Navbar />
 
       {/* Content */}
       <Hero />
       <TrustedBy />
-      <div className="animated-gradient-line max-w-4xl mx-auto" />
+      <div className="gradient-line max-w-4xl mx-auto" />
       <Features />
-      <div className="animated-gradient-line max-w-4xl mx-auto" />
+      <div className="gradient-line max-w-4xl mx-auto" />
       <HowItWorks />
       <Stats />
-      <div className="animated-gradient-line max-w-4xl mx-auto" />
+      <div className="gradient-line max-w-4xl mx-auto" />
       <Testimonials />
       <Pricing />
-      <div className="animated-gradient-line max-w-4xl mx-auto" />
+      <div className="gradient-line max-w-4xl mx-auto" />
       <FAQ />
       <CTA />
       <Footer />

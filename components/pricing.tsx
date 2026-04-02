@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
@@ -12,7 +11,7 @@ const plans = [
     price: { monthly: 0, yearly: 0 },
     priceLabel: 'Free',
     cta: 'Start Free Today',
-    ctaLink: 'https://service.2xg.in',
+    ctaLink: 'https://getservice.2xg.in',
     featured: false,
     badge: null,
     features: [
@@ -31,7 +30,7 @@ const plans = [
     price: { monthly: 499, yearly: 333 },
     priceLabel: null,
     cta: 'Start with ₹249 First Month',
-    ctaLink: 'https://service.2xg.in',
+    ctaLink: 'https://getservice.2xg.in',
     featured: true,
     badge: 'FIRST MONTH ₹249',
     features: [
@@ -73,40 +72,20 @@ const plans = [
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
     <section
       id="pricing"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
+      className="py-10 sm:py-14 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="text-center mb-12 sm:mb-16"
-        >
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+        <div className="text-center mb-6 sm:mb-10">
+          <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-3">
             Affordable Plans for Every Workshop
           </h2>
-          <p className="text-gray-700 text-base sm:text-lg mb-4 max-w-xl mx-auto">
+          <p className="text-gray-700 text-sm sm:text-lg mb-3 max-w-xl mx-auto">
             Cheaper than a chai-per-day habit. Start free, upgrade when you grow. No hidden charges — ever.
           </p>
-          <p className="text-amber-600 font-medium text-sm italic mb-8">
+          <p className="text-amber-600 font-medium text-sm italic mb-6">
             &quot;Ek chai ki keemat mein poora workshop management — sochna kya, shuru karo!&quot;
           </p>
 
@@ -114,7 +93,7 @@ export function Pricing() {
           <div className="inline-flex items-center p-1 rounded-full bg-gray-200 border border-gray-300">
             <button
               onClick={() => setIsYearly(false)}
-              className={`px-5 sm:px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
+              className={`px-4 sm:px-6 py-2.5 rounded-full font-semibold text-sm transition-all ${
                 !isYearly
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -124,7 +103,7 @@ export function Pricing() {
             </button>
             <button
               onClick={() => setIsYearly(true)}
-              className={`px-5 sm:px-6 py-2.5 rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${
+              className={`px-4 sm:px-6 py-2.5 rounded-full font-semibold text-sm transition-all flex items-center gap-2 ${
                 isYearly
                   ? 'bg-white text-gray-900 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800'
@@ -140,37 +119,92 @@ export function Pricing() {
               </span>
             </button>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Pricing Cards */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          className="grid md:grid-cols-3 gap-6 sm:gap-8 items-stretch"
-        >
-          {plans.map((plan, idx) => (
-            <motion.div
+        {/* Pricing Cards — horizontal scroll on mobile, grid on desktop */}
+        <div className="md:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 pb-2" style={{ scrollSnapType: 'x mandatory' }}>
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                style={{ scrollSnapAlign: 'start' }}
+                className={`rounded-2xl p-5 border transition-shadow flex flex-col min-w-[280px] w-[300px] flex-shrink-0 ${
+                  plan.featured
+                    ? 'bg-gradient-to-b from-blue-50 to-white border-primary-200 shadow-lg shadow-primary-100'
+                    : 'bg-white border-gray-300 shadow-md shadow-gray-100'
+                }`}
+              >
+                {plan.featured && (
+                  <div className="mb-3 flex gap-2 flex-wrap">
+                    <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white">
+                      Most Popular
+                    </div>
+                    {plan.badge && (
+                      <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200">
+                        {plan.badge}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <h3 className="font-display font-bold text-gray-900 text-lg mb-1">{plan.name}</h3>
+                <p className="text-gray-700 text-sm mb-4">{plan.description}</p>
+                <div className="mb-4">
+                  {plan.priceLabel ? (
+                    <p className="text-3xl font-bold text-gray-900">{plan.priceLabel}</p>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-bold text-gray-900">₹{isYearly ? plan.price.yearly : plan.price.monthly}</span>
+                      <p className="text-gray-700 text-xs mt-1">per {isYearly ? 'month (billed yearly)' : 'month'}</p>
+                      {plan.featured && (
+                        <p className="text-emerald-600 text-xs font-semibold mt-1">
+                          {isYearly ? '₹3,999/year — save ₹2,000!' : 'First month only ₹249 — 50% off!'}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+                <Link
+                  href={plan.ctaLink}
+                  target={plan.ctaLink.startsWith('mailto:') ? undefined : '_blank'}
+                  rel={plan.ctaLink.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+                  className={`w-full py-3 rounded-full font-semibold text-sm text-center block active:scale-[0.98] transition-all mb-4 ${
+                    plan.featured
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/30'
+                      : 'bg-gray-50 border border-gray-300 text-gray-800 hover:bg-gray-100'
+                  }`}
+                >
+                  {plan.cta} →
+                </Link>
+                <div className="space-y-2 flex-1">
+                  {plan.features.map((feature, featureIdx) => (
+                    <div key={featureIdx} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-800 text-xs">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop grid */}
+        <div className="hidden md:grid md:grid-cols-3 gap-6 items-stretch">
+          {plans.map((plan) => (
+            <div
               key={plan.name}
-              variants={itemVariants}
-              whileHover={{ y: -8, scale: 1.02 }}
-              className={`rounded-2xl p-6 sm:p-8 border transition-all duration-300 flex flex-col ${
+              className={`rounded-2xl p-5 sm:p-7 border transition-shadow flex flex-col ${
                 plan.featured
-                  ? 'bg-gradient-to-b from-blue-50 to-white border-primary-200 shadow-lg shadow-primary-100 hover:shadow-xl hover:shadow-primary-200'
-                  : 'bg-white border-gray-300 shadow-md shadow-gray-100 hover:border-primary-300 hover:shadow-lg hover:shadow-primary-100'
+                  ? 'bg-gradient-to-b from-blue-50 to-white border-primary-200 shadow-lg shadow-primary-100'
+                  : 'bg-white border-gray-300 shadow-md shadow-gray-100'
               }`}
             >
               {/* Featured Badge */}
               {plan.featured && (
                 <div className="mb-4 flex gap-2 flex-wrap">
-                  <motion.div
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white"
-                  >
+                  <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white">
                     Most Popular
-                  </motion.div>
+                  </div>
                   {plan.badge && (
                     <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200">
                       {plan.badge}
@@ -180,13 +214,13 @@ export function Pricing() {
               )}
 
               {/* Plan Name */}
-              <h3 className="font-display font-bold text-gray-900 text-xl sm:text-2xl mb-2">
+              <h3 className="font-display font-bold text-gray-900 text-lg sm:text-2xl mb-1">
                 {plan.name}
               </h3>
-              <p className="text-gray-700 text-sm mb-6">{plan.description}</p>
+              <p className="text-gray-700 text-sm mb-5">{plan.description}</p>
 
               {/* Price */}
-              <div className="mb-6">
+              <div className="mb-5">
                 {plan.priceLabel ? (
                   <p className="text-3xl sm:text-4xl font-bold text-gray-900">{plan.priceLabel}</p>
                 ) : (
@@ -195,10 +229,6 @@ export function Pricing() {
                       <span className="text-3xl sm:text-4xl font-bold text-gray-900">
                         ₹{isYearly ? plan.price.yearly : plan.price.monthly}
                       </span>
-                      {plan.featured && !isYearly && (
-                        <span className="text-sm text-emerald-600 font-semibold line-through decoration-slate-500">
-                        </span>
-                      )}
                     </div>
                     <p className="text-gray-700 text-xs sm:text-sm mt-1">
                       per {isYearly ? 'month (billed yearly)' : 'month'}
@@ -217,9 +247,9 @@ export function Pricing() {
                 href={plan.ctaLink}
                 target={plan.ctaLink.startsWith('mailto:') ? undefined : '_blank'}
                 rel={plan.ctaLink.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className={`w-full py-3 rounded-full font-semibold text-sm transition-all mb-6 ${
+                className={`w-full py-3 rounded-full font-semibold text-sm text-center block active:scale-[0.98] transition-all mb-5 ${
                   plan.featured
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/50'
+                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/30'
                     : 'bg-gray-50 border border-gray-300 text-gray-800 hover:bg-gray-100'
                 }`}
               >
@@ -227,17 +257,17 @@ export function Pricing() {
               </Link>
 
               {/* Features List */}
-              <div className="space-y-3 flex-1">
+              <div className="space-y-2.5 flex-1">
                 {plan.features.map((feature, featureIdx) => (
-                  <div key={featureIdx} className="flex items-start gap-3">
+                  <div key={featureIdx} className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                     <span className="text-gray-800 text-sm">{feature}</span>
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

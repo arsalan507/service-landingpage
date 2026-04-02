@@ -1,75 +1,65 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
 
 const stats = [
-  { number: 15000, label: 'Bikes Serviced', suffix: '+', color: 'from-primary-500 to-blue-500' },
-  { number: 500, label: 'Workshops Across India', suffix: '+', color: 'from-accent-500 to-purple-500' },
-  { number: 4.8, label: 'Avg Google Rating', suffix: '★', color: 'from-emerald-500 to-green-500' },
-  { number: 40, label: 'Cities in India', suffix: '+', color: 'from-orange-500 to-red-500' },
+  { number: 15000, label: 'Bikes Serviced', suffix: '+', color: 'text-blue-600' },
+  { number: 500, label: 'Workshops Across India', suffix: '+', color: 'text-violet-600' },
+  { number: 4.8, label: 'Avg Google Rating', suffix: '★', color: 'text-emerald-600' },
+  { number: 40, label: 'Cities in India', suffix: '+', color: 'text-orange-600' },
 ];
 
 function CountUpStat({ target, label, suffix, color }: { target: number; label: string; suffix: string; color: string }) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || hasAnimated.current) return;
+    hasAnimated.current = true;
 
-    const duration = 2;
-    const increment = target / (duration * 60);
-    let current = 0;
+    const duration = 1500;
+    const startTime = performance.now();
+    const isDecimal = target % 1 !== 0;
 
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = target * eased;
+
+      setCount(isDecimal ? parseFloat(current.toFixed(1)) : Math.floor(current));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
       } else {
-        setCount(Math.floor(current));
+        setCount(target);
       }
-    }, 1000 / 60);
+    };
 
-    return () => clearInterval(timer);
+    requestAnimationFrame(animate);
   }, [isInView, target]);
 
+  const display = target % 1 !== 0 ? count.toFixed(1) : count.toLocaleString('en-IN');
+
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      className="flex flex-col items-center justify-center py-8 md:py-0"
-    >
-      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r ${color} bg-clip-text text-transparent mb-2`}>
-        {count}
-        {suffix}
+    <div ref={ref} className="flex flex-col items-center justify-center py-6 md:py-0">
+      <div className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${color} mb-2`}>
+        {display}{suffix}
       </div>
       <p className="text-gray-700 text-sm sm:text-base text-center">{label}</p>
-    </motion.div>
+    </div>
   );
 }
 
 export function Stats() {
   return (
-    <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
+    <section className="py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="bg-white rounded-3xl p-8 md:p-12 border border-gray-300 shadow-lg shadow-gray-100 relative overflow-hidden"
-        >
-          {/* Animated glow */}
-          <motion.div
-            className="absolute -inset-1 bg-gradient-to-r from-primary-500/10 via-accent-500/10 to-emerald-500/10 rounded-3xl blur-xl"
-            animate={{ opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <div className="relative grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-12 border border-gray-300 shadow-lg shadow-gray-100">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-gray-200">
             {stats.map((stat, idx) => (
               <CountUpStat
                 key={idx}
@@ -80,7 +70,7 @@ export function Stats() {
               />
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

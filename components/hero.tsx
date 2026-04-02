@@ -37,69 +37,46 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="min-h-screen pt-24 sm:pt-32 lg:pt-40 pb-12 sm:pb-20 lg:pb-24 px-4 sm:px-6 lg:px-8">
+    <section className="lg:min-h-[calc(100svh-4rem)] pt-18 sm:pt-24 lg:pt-28 pb-8 sm:pb-12 lg:pb-14 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-16 items-center">
           {/* Left Column */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-5 sm:space-y-8"
-          >
+          <div className="space-y-4 sm:space-y-6">
             {/* Offer Badge */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
-              className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 text-xs sm:text-sm font-semibold"
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 text-xs sm:text-sm font-semibold"
             >
-              <motion.div
-                className="relative w-2 h-2"
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <div className="absolute inset-0 bg-emerald-500 rounded-full" />
-                <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping" />
-              </motion.div>
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               First Month Pro at just ₹249 (50% off)
             </motion.div>
 
             {/* Heading with rotating word */}
-            <div className="space-y-3 sm:space-y-4">
-              <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="font-display text-[1.75rem] leading-tight sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
                 Tired of Customers{' '}
-                <span className="relative inline-block min-w-[160px] sm:min-w-[280px]">
+                <span className="relative inline-block min-w-[140px] sm:min-w-[240px] lg:min-w-[280px]">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={wordIndex}
-                      initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
-                      transition={{ duration: 0.4 }}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -15 }}
+                      transition={{ duration: 0.3 }}
                       className={`relative z-10 bg-gradient-to-r ${rotatingWords[wordIndex].color} bg-clip-text text-transparent`}
                     >
                       {rotatingWords[wordIndex].text}
                     </motion.span>
                   </AnimatePresence>
-                  <motion.div
-                    className="absolute bottom-0 sm:bottom-2 left-0 right-0 h-0.5 sm:h-1 bg-red-500/10 rounded-lg"
-                    initial={{ width: '0%' }}
-                    animate={{ width: '100%' }}
-                    transition={{ delay: 0.5, duration: 0.8 }}
-                  />
                 </span>{' '}
                 Your Workshop?
               </h1>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="text-base sm:text-xl text-gray-800 font-medium"
-              >
+              <p className="text-sm sm:text-lg lg:text-xl text-gray-800 font-medium max-w-lg">
                 Show them every step. Build trust. Get 5-star reviews automatically.
-              </motion.p>
+              </p>
             </div>
 
             {/* Rotating Hinglish line */}
@@ -107,11 +84,11 @@ export function Hero() {
               <AnimatePresence mode="wait">
                 <motion.p
                   key={lineIndex}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-sm sm:text-base text-amber-700 font-semibold italic"
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-xs sm:text-sm lg:text-base text-amber-700 font-semibold italic"
                 >
                   {hinglishLines[lineIndex]}
                 </motion.p>
@@ -119,88 +96,49 @@ export function Hero() {
             </div>
 
             {/* Pain Point + Solution */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="text-sm sm:text-lg text-gray-800 max-w-lg leading-relaxed"
-            >
+            <p className="text-xs sm:text-base lg:text-lg text-gray-800 max-w-lg leading-relaxed">
               70% of Indian bike owners suspect overcharging at service centers. 2XG gives your customers <strong className="text-gray-900">live tracking, photo proof, and WhatsApp updates</strong> — so they never doubt your work again.
-            </motion.p>
+            </p>
 
             {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-            >
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="https://service.2xg.in"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/50 transition-all"
-                >
-                  Start Free — No Card Needed →
-                </Link>
-              </motion.div>
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
-                <Link
-                  href="#pricing"
-                  className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-semibold text-gray-800 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 transition-colors"
-                >
-                  See Pricing (from ₹0/month)
-                </Link>
-              </motion.div>
-            </motion.div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link
+                href="https://getservice.2xg.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98] transition-all"
+              >
+                Start Free — No Card Needed →
+              </Link>
+              <Link
+                href="#pricing"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-semibold text-gray-800 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all"
+              >
+                See Pricing (from ₹0/month)
+              </Link>
+            </div>
 
             {/* Trust Badges */}
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.1, delayChildren: 1 } },
-              }}
-              className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-6 text-xs sm:text-sm text-gray-800 pt-4 sm:pt-6 border-t border-gray-300"
-            >
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-5 text-xs sm:text-sm text-gray-800 pt-4 border-t border-gray-300">
               {[
                 '500+ workshops',
                 'Works on any phone',
                 '2 min setup',
                 'Hindi & English',
               ].map((badge, idx) => (
-                <motion.div
-                  key={idx}
-                  variants={{
-                    hidden: { opacity: 0, x: -10 },
-                    visible: { opacity: 1, x: 0 },
-                  }}
-                  className="flex items-center gap-1.5 sm:gap-2"
-                >
+                <div key={idx} className="flex items-center gap-1.5">
                   <div className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-emerald-600 text-xs">✓</span>
                   </div>
                   {badge}
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          {/* Right Column - Dashboard Mockup — hidden on mobile */}
-          <motion.div
-            initial={{ opacity: 0, x: 50, rotateY: 10 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{ delay: 0.3, duration: 1, type: 'spring' }}
-            className="hidden lg:flex justify-center perspective-[1000px]"
-          >
-            <motion.div
-              className="max-w-sm w-full bg-white rounded-2xl p-6 sm:p-8 shadow-xl shadow-gray-200/80 border border-gray-300"
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              whileHover={{ scale: 1.02, rotateY: -3 }}
-            >
+          {/* Right Column - Dashboard Mockup — hidden on mobile/tablet */}
+          <div className="hidden lg:flex justify-center">
+            <div className="max-w-sm w-full bg-white rounded-2xl p-6 sm:p-8 shadow-xl shadow-gray-200/80 border border-gray-300">
               {/* Shop Header */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-300">
                 <div className="space-y-1">
@@ -209,16 +147,10 @@ export function Hero() {
                   </h3>
                   <p className="text-xs text-gray-600">Workshop</p>
                 </div>
-                <motion.div
-                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200"
-                  animate={{ boxShadow: ['0 0 0px rgba(52,211,153,0)', '0 0 12px rgba(52,211,153,0.3)', '0 0 0px rgba(52,211,153,0)'] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <div className="relative w-2 h-2">
-                    <div className="absolute inset-0 bg-emerald-400 rounded-full animate-pulse" />
-                  </div>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                   <span className="text-xs text-emerald-600 font-semibold">LIVE</span>
-                </motion.div>
+                </div>
               </div>
 
               {/* Job Card */}
@@ -239,63 +171,33 @@ export function Hero() {
                 </div>
 
                 <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ width: '65%' }}
-                    transition={{ duration: 2, delay: 0.5, ease: 'easeOut' }}
-                  />
+                  <div className="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full w-[65%]" />
                 </div>
 
                 {/* Checklist */}
-                <motion.div
-                  className="space-y-2 pt-2"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: 0.3, delayChildren: 1.5 } },
-                  }}
-                >
+                <div className="space-y-2 pt-2">
                   {[
                     'Photos received',
                     'In-progress update sent',
                     'Waiting for feedback',
                   ].map((item, idx) => (
-                    <motion.div
-                      key={idx}
-                      variants={{
-                        hidden: { opacity: 0, x: -10 },
-                        visible: { opacity: 1, x: 0 },
-                      }}
-                      className="flex items-center gap-2 text-xs text-gray-700"
-                    >
-                      <motion.div
-                        className="w-3 h-3 rounded-full bg-primary-100 flex items-center justify-center"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 1.5 + idx * 0.3, type: 'spring' }}
-                      >
+                    <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
+                      <div className="w-3 h-3 rounded-full bg-primary-100 flex items-center justify-center">
                         <span className="text-primary-600 text-[10px]">✓</span>
-                      </motion.div>
+                      </div>
                       {item}
-                    </motion.div>
+                    </div>
                   ))}
-                </motion.div>
+                </div>
 
                 {/* WhatsApp notification */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 3, type: 'spring', stiffness: 200 }}
-                  className="mt-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2"
-                >
+                <div className="mt-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2">
                   <span className="text-emerald-600 text-sm">📱</span>
                   <div>
                     <p className="text-[10px] text-emerald-700 font-semibold">WhatsApp sent</p>
                     <p className="text-[10px] text-gray-600">&quot;Aapki bike ka oil change ho gaya hai&quot;</p>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Mechanic Info */}
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-300">
@@ -310,8 +212,8 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

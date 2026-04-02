@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
   Activity,
   Camera,
@@ -15,21 +14,21 @@ import {
 const primaryFeatures = [
   {
     title: 'Live Tracking',
-    description: 'Customers see exactly what\'s happening — no more "come back in 2 hours" guesswork. Build trust with every update.',
+    description: 'Customers see exactly what\'s happening — no more "come back in 2 hours" guesswork.',
     hinglish: '"Kab tak hoga?" — Ab ye call nahi aayegi.',
     icon: Activity,
     color: 'from-primary-500 to-blue-500',
   },
   {
     title: 'Photo Proof',
-    description: 'Before & after photos eliminate "did they actually change the part?" doubts. End overcharging complaints forever.',
+    description: 'Before & after photos eliminate "did they actually change the part?" doubts.',
     hinglish: '"Sach mein part badla?" — Ab photo dekho, bharosa karo.',
     icon: Camera,
     color: 'from-accent-500 to-purple-500',
   },
   {
     title: 'WhatsApp Alerts',
-    description: 'Auto-send updates on WhatsApp — India\'s #1 app. No customer needs to call and ask "is my bike ready?"',
+    description: 'Auto-send updates on WhatsApp — India\'s #1 app. No more "is my bike ready?" calls.',
     hinglish: 'Customer ko WhatsApp pe automatic update — tension khatam.',
     icon: MessageCircle,
     color: 'from-emerald-500 to-green-500',
@@ -48,129 +47,69 @@ export function Features() {
   return (
     <section
       id="features"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 relative bg-gray-50/60"
+      className="py-10 sm:py-14 px-4 sm:px-6 lg:px-8 relative bg-gray-50/60"
     >
-      <div className="absolute inset-0 dot-grid opacity-[0.015]" />
-
       <div className="max-w-7xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="text-center mb-16 sm:mb-20"
-        >
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
+        <div className="text-center mb-5 sm:mb-10">
+          <h2 className="font-display text-xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
             Every Feature Your Workshop Needs
           </h2>
-          <p className="text-gray-700 text-base sm:text-lg mt-4 max-w-2xl mx-auto">
-            Built for Indian service centers — solve the trust gap, reduce customer complaints, and grow your business with 5-star reviews.
+          <p className="text-gray-700 text-xs sm:text-lg mt-2 sm:mt-3 max-w-2xl mx-auto">
+            Built for Indian service centers — solve the trust gap, reduce complaints, grow with 5-star reviews.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Primary Features Grid */}
-        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12">
-          {primaryFeatures.map((feature, idx) => {
+        {/* Primary Features — compact on mobile, cards on desktop */}
+        <div className="grid md:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-10">
+          {primaryFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ delay: idx * 0.08 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="group bg-white rounded-2xl p-6 sm:p-8 border border-gray-300 shadow-md shadow-gray-100 hover:border-primary-400 hover:shadow-lg hover:shadow-primary-100 transition-all duration-300"
+                className="group bg-white rounded-xl sm:rounded-2xl p-3.5 sm:p-7 border border-gray-300 shadow-md shadow-gray-100 hover:border-primary-400 hover:shadow-lg transition-all"
               >
-                <div
-                  className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
-                >
-                  <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                {/* Mobile: horizontal layout | Desktop: vertical */}
+                <div className="flex items-start gap-3 sm:block">
+                  <div
+                    className={`w-9 h-9 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center flex-shrink-0 sm:mb-3 group-hover:scale-105 transition-transform`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-7 sm:h-7 text-white" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-display font-bold text-gray-900 text-sm sm:text-lg sm:mb-2">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-700 text-xs sm:text-sm mt-0.5 sm:mt-0 line-clamp-2 sm:line-clamp-none">
+                      {feature.description}
+                    </p>
+                    <p className="text-amber-600 font-medium text-[11px] sm:text-xs italic mt-1 sm:mt-2">
+                      {feature.hinglish}
+                    </p>
+                  </div>
                 </div>
-
-                <h3 className="font-display font-bold text-gray-900 text-base sm:text-lg mb-2">
-                  {feature.title}
-                </h3>
-
-                <p className="text-gray-700 text-sm">
-                  {feature.description}
-                </p>
-
-                <p className="text-amber-600 font-medium text-xs italic mt-2">
-                  {feature.hinglish}
-                </p>
-
-                {/* Visual representation */}
-                <div className="mt-4 space-y-2">
-                  {feature.title === 'Live Tracking' && (
-                    <div className="flex gap-2">
-                      {['Received', 'Assigned', 'In Progress', 'Done', 'Delivered'].map((step, i) => (
-                        <div
-                          key={step}
-                          className={`w-2 h-2 rounded-full ${
-                            i <= 2 ? 'bg-emerald-400' : 'bg-slate-600'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {feature.title === 'Photo Updates' && (
-                    <div className="flex gap-2 h-12">
-                      <div className="flex-1 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
-                        <Camera className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <div className="flex-1 bg-gray-100 rounded border border-gray-300 flex items-center justify-center">
-                        <Camera className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <div className="w-6 h-12 bg-emerald-100 rounded flex items-center justify-center">
-                        <span className="text-xs text-emerald-600">✓</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {feature.title === 'WhatsApp Alerts' && (
-                    <div className="flex flex-col gap-1 text-xs">
-                      <div className="px-2 py-1 rounded bg-emerald-50 text-emerald-600 border border-emerald-200">
-                        ✓ Received
-                      </div>
-                      <div className="px-2 py-1 rounded bg-accent-50 text-accent-600 border border-accent-200">
-                        ⚙ In Progress
-                      </div>
-                      <div className="px-2 py-1 rounded bg-orange-50 text-orange-600 border border-orange-200">
-                        🔔 Ready
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
         {/* Secondary Features Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {secondaryFeatures.map((feature, idx) => {
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+          {secondaryFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-80px' }}
-                transition={{ delay: 0.24 + idx * 0.08 }}
-                whileHover={{ y: -6, scale: 1.05 }}
-                className="group bg-white rounded-lg p-4 border border-gray-300 shadow-sm hover:border-primary-300 hover:shadow-md hover:shadow-primary-100 transition-all duration-300 cursor-default"
+                className="group bg-white rounded-lg p-2.5 sm:p-4 border border-gray-300 shadow-sm hover:border-primary-300 hover:shadow-md transition-all"
               >
-                <div className="flex flex-col items-center text-center space-y-2">
-                  <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${feature.color} group-hover:scale-110 transition-transform`} />
-                  <h4 className="font-semibold text-gray-900 text-xs sm:text-sm">
+                <div className="flex flex-col items-center text-center space-y-1">
+                  <Icon className={`w-4 h-4 sm:w-6 sm:h-6 ${feature.color}`} />
+                  <h4 className="font-semibold text-gray-900 text-[10px] sm:text-sm">
                     {feature.title}
                   </h4>
-                  {'desc' in feature && (
-                    <p className="text-gray-600 text-xs">{(feature as any).desc}</p>
-                  )}
+                  <p className="text-gray-600 text-[9px] sm:text-xs hidden sm:block">{feature.desc}</p>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
 
 const testimonials = [
@@ -44,98 +43,58 @@ const testimonials = [
 
 function TestimonialCard({ quote, author, role, initials }: { quote: string; author: string; role: string; initials: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true }}
-      className="bg-white rounded-2xl p-6 min-w-[320px] w-full flex flex-col border border-gray-300 shadow-md shadow-gray-100 hover:border-gray-300 hover:shadow-lg transition-all"
-    >
-      <div className="flex gap-1 mb-4">
+    <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col border border-gray-300 shadow-md shadow-gray-100 min-w-[260px] w-[280px] sm:w-[340px] lg:w-[360px] flex-shrink-0">
+      <div className="flex gap-0.5 mb-2 sm:mb-3">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+          <Star key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
         ))}
       </div>
 
-      <p className="text-gray-800 text-sm mb-6 flex-1 leading-relaxed">
-        "{quote}"
+      <p className="text-gray-800 text-xs sm:text-sm mb-3 sm:mb-5 flex-1 leading-relaxed">
+        &ldquo;{quote}&rdquo;
       </p>
 
-      <div className="flex items-center gap-3 pt-4 border-t border-gray-300">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
+      <div className="flex items-center gap-2.5 pt-3 border-t border-gray-300">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-xs sm:text-sm font-bold text-white flex-shrink-0">
           {initials.charAt(0)}
         </div>
         <div className="min-w-0">
-          <p className="text-gray-900 text-sm font-semibold truncate">{author}</p>
-          <p className="text-gray-700 text-xs">{role}</p>
+          <p className="text-gray-900 text-xs sm:text-sm font-semibold truncate">{author}</p>
+          <p className="text-gray-700 text-[11px] sm:text-xs">{role}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
 export function Testimonials() {
-  // Create duplicates for seamless marquee
-  const row1 = testimonials.slice(0, 3);
-  const row2 = testimonials.slice(3, 6);
-  const row1Extended = [...row1, ...row1, ...row1, ...row1];
-  const row2Extended = [...row2, ...row2, ...row2, ...row2];
-
   return (
     <section
       id="testimonials"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gray-50/60"
+      className="py-10 sm:py-14 px-4 sm:px-6 lg:px-8 bg-gray-50/60"
     >
-      <div className="max-w-7xl mx-auto mb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="text-center"
-        >
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-5 sm:mb-8">
+          <h2 className="font-display text-xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
             Trusted by Workshops Across India
           </h2>
-          <p className="text-amber-600 font-medium text-sm italic mt-4">
+          <p className="text-amber-600 font-medium text-xs sm:text-sm italic mt-2 sm:mt-3">
             &quot;Logon ki sunn lo — 2XG ne unka kaam aasan kar diya.&quot;
           </p>
-        </motion.div>
-      </div>
-
-      {/* Row 1 */}
-      <div className="relative mb-6">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10" />
-
-        <div className="flex gap-4 overflow-hidden">
-          <div className="marquee flex gap-4 shrink-0">
-            {row1Extended.map((testimonial, idx) => (
-              <TestimonialCard
-                key={`${idx}`}
-                quote={testimonial.quote}
-                author={testimonial.author}
-                role={testimonial.role}
-                initials={testimonial.initials}
-              />
-            ))}
-          </div>
         </div>
-      </div>
 
-      {/* Row 2 */}
-      <div className="relative">
-        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-gray-50 to-transparent pointer-events-none z-10" />
-        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-gray-50 to-transparent pointer-events-none z-10" />
-
-        <div className="flex gap-4 overflow-hidden">
-          <div className="marquee-reverse flex gap-4 shrink-0">
-            {row2Extended.map((testimonial, idx) => (
-              <TestimonialCard
-                key={`${idx}`}
-                quote={testimonial.quote}
-                author={testimonial.author}
-                role={testimonial.role}
-                initials={testimonial.initials}
-              />
+        {/* Horizontal scroll on all screen sizes */}
+        <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-4 pb-2" style={{ scrollSnapType: 'x mandatory' }}>
+            {testimonials.map((testimonial, idx) => (
+              <div key={idx} style={{ scrollSnapAlign: 'start' }}>
+                <TestimonialCard
+                  quote={testimonial.quote}
+                  author={testimonial.author}
+                  role={testimonial.role}
+                  initials={testimonial.initials}
+                />
+              </div>
             ))}
           </div>
         </div>

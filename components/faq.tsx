@@ -1,6 +1,5 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
 
@@ -48,7 +47,7 @@ const faqs = [
 ];
 
 export function FAQ() {
-  const [openIndices, setOpenIndices] = useState<Set<number>>(new Set([0, 1]));
+  const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
   const [showAll, setShowAll] = useState(false);
 
   const visibleFaqs = showAll ? faqs : faqs.slice(0, 2);
@@ -68,37 +67,27 @@ export function FAQ() {
   return (
     <section
       id="faq"
-      className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8"
+      className="py-10 sm:py-14 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-3xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="text-center mb-12 sm:mb-16"
-        >
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
+        <div className="text-center mb-5 sm:mb-8">
+          <h2 className="font-display text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
             Common Questions
           </h2>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: '-80px' }}
-          className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-300 shadow-lg shadow-gray-100 space-y-3"
-        >
+        <div className="bg-white rounded-2xl p-4 sm:p-6 border border-gray-300 shadow-lg shadow-gray-100 space-y-2">
           {visibleFaqs.map((faq, idx) => (
-            <motion.div key={idx} layout>
+            <div key={idx}>
               <button
                 onClick={() => toggleIndex(idx)}
-                className="w-full flex items-center justify-between gap-4 px-4 sm:px-6 py-4 rounded-lg hover:bg-gray-50 transition-colors group"
+                className="w-full flex items-center justify-between gap-3 px-3 sm:px-5 py-3.5 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors group"
               >
                 <span className="text-left font-semibold text-gray-900 text-sm sm:text-base">
                   {faq.question}
                 </span>
 
-                <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 transition-colors">
                   {openIndices.has(idx) ? (
                     <Minus className="w-4 h-4 text-primary-600" />
                   ) : (
@@ -107,35 +96,23 @@ export function FAQ() {
                 </div>
               </button>
 
-              <AnimatePresence>
-                {openIndices.has(idx) && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="px-4 sm:px-6 pb-4 text-gray-800 text-sm sm:text-base leading-relaxed">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+              {openIndices.has(idx) && (
+                <div className="px-3 sm:px-5 pb-3 text-gray-800 text-sm sm:text-base leading-relaxed">
+                  {faq.answer}
+                </div>
+              )}
+            </div>
           ))}
 
           {!showAll && (
-            <motion.button
+            <button
               onClick={() => setShowAll(true)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full mt-4 py-3 rounded-xl text-sm font-semibold text-primary-600 bg-primary-50 border border-primary-200 hover:bg-primary-100 transition-colors"
+              className="w-full mt-3 py-3 rounded-xl text-sm font-semibold text-primary-600 bg-primary-50 border border-primary-200 hover:bg-primary-100 active:bg-primary-200 transition-colors"
             >
               Show {faqs.length - 2} More Questions ↓
-            </motion.button>
+            </button>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

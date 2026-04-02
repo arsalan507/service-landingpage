@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -9,149 +8,96 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-300 bg-gray-50/80 backdrop-blur">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        {/* Main Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-12 sm:mb-16">
-          {/* Brand Column */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            className="col-span-2 md:col-span-1"
-          >
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 p-1">
-                <Image
-                  src="/2XGLOGO.jpeg"
-                  alt="2XG Logo"
-                  width={32}
-                  height={32}
-                  className="w-full h-full rounded-md object-contain"
-                />
+    <footer className="bg-gray-950 text-gray-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14">
+        {/* Mobile: compact layout | Desktop: grid */}
+        <div className="sm:hidden space-y-5 mb-5">
+          {/* Brand */}
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-white/10 p-0.5">
+                <Image src="/2XGLOGO.jpeg" alt="2XG Logo" width={28} height={28} loading="lazy" className="w-full h-full rounded object-contain" />
               </div>
-              <span className="font-display font-bold text-gray-900">2XG Service</span>
+              <span className="font-display font-bold text-white text-sm">2XG Service</span>
             </Link>
-            <p className="text-gray-700 text-sm mb-4">
-              India's smartest bike service management platform. Trusted by 500+ workshops in 40+ cities.
-            </p>
-            <div className="flex gap-3">
-              {[
-                { icon: Instagram, href: 'https://instagram.com' },
-                { icon: Twitter, href: 'https://twitter.com' },
-                { icon: Linkedin, href: 'https://linkedin.com' },
-                { icon: Youtube, href: 'https://youtube.com' },
-              ].map((social, idx) => {
-                const Icon = social.icon;
-                return (
-                  <Link
-                    key={idx}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-gray-700 hover:text-gray-900 hover:border-gray-300 transition-colors border border-gray-300"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </Link>
-                );
-              })}
+            <div className="flex gap-2">
+              {[Instagram, Twitter, Linkedin, Youtube].map((Icon, idx) => (
+                <Link key={idx} href="#" className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center text-gray-500 hover:text-white border border-white/10">
+                  <Icon className="w-3.5 h-3.5" />
+                </Link>
+              ))}
             </div>
-          </motion.div>
+          </div>
 
-          {/* Product Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ delay: 0.1 }}
-          >
-            <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-widest mb-4">
-              Product
-            </h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Features', href: '#features' },
-                { label: 'Pricing', href: '#pricing' },
-                { label: 'How it Works', href: '#how-it-works' },
-                { label: 'Reviews', href: '#testimonials' },
-                { label: 'FAQ', href: '#faq' },
-              ].map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-700 hover:text-gray-900 text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
+          {/* Links in 3 columns */}
+          <div className="grid grid-cols-3 gap-4 text-xs">
+            <div>
+              <h3 className="font-semibold text-white uppercase tracking-wider mb-2">Product</h3>
+              {['Features', 'Pricing', 'How it Works', 'Reviews', 'FAQ'].map((l) => (
+                <Link key={l} href={`#${l.toLowerCase().replace(/\s/g, '-')}`} className="block text-gray-500 hover:text-white py-0.5">{l}</Link>
+              ))}
+            </div>
+            <div>
+              <h3 className="font-semibold text-white uppercase tracking-wider mb-2">Support</h3>
+              <Link href="mailto:hello@2xg.in" className="block text-gray-500 hover:text-white py-0.5">Contact Us</Link>
+              <Link href="mailto:hello@2xg.in" className="block text-gray-500 hover:text-white py-0.5">Help Center</Link>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white uppercase tracking-wider mb-2">Legal</h3>
+              <Link href="/privacy" className="block text-gray-500 hover:text-white py-0.5">Privacy</Link>
+              <Link href="/" className="block text-gray-500 hover:text-white py-0.5">Terms</Link>
+              <Link href="/" className="block text-gray-500 hover:text-white py-0.5">Refunds</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: full grid */}
+        <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-8 sm:mb-12">
+          <div className="col-span-1">
+            <Link href="/" className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 p-0.5">
+                <Image src="/2XGLOGO.jpeg" alt="2XG Logo" width={32} height={32} loading="lazy" className="w-full h-full rounded-md object-contain" />
+              </div>
+              <span className="font-display font-bold text-white">2XG Service</span>
+            </Link>
+            <p className="text-gray-400 text-sm mb-3">India&apos;s smartest bike service management platform. Trusted by 500+ workshops in 40+ cities.</p>
+            <div className="flex gap-2">
+              {[Instagram, Twitter, Linkedin, Youtube].map((Icon, idx) => (
+                <Link key={idx} href="#" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors border border-white/10">
+                  <Icon className="w-4 h-4" />
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm uppercase tracking-widest mb-3">Product</h3>
+            <ul className="space-y-2">
+              {[{ label: 'Features', href: '#features' }, { label: 'Pricing', href: '#pricing' }, { label: 'How it Works', href: '#how-it-works' }, { label: 'Reviews', href: '#testimonials' }, { label: 'FAQ', href: '#faq' }].map((link) => (
+                <li key={link.label}><Link href={link.href} className="text-gray-400 hover:text-white text-sm transition-colors">{link.label}</Link></li>
               ))}
             </ul>
-          </motion.div>
-
-          {/* Support Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ delay: 0.2 }}
-          >
-            <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-widest mb-4">
-              Support
-            </h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Contact Us', href: 'mailto:hello@2xg.in' },
-                { label: 'Help Center', href: 'mailto:hello@2xg.in' },
-              ].map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-700 hover:text-gray-900 text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm uppercase tracking-widest mb-3">Support</h3>
+            <ul className="space-y-2">
+              <li><Link href="mailto:hello@2xg.in" className="text-gray-400 hover:text-white text-sm transition-colors">Contact Us</Link></li>
+              <li><Link href="mailto:hello@2xg.in" className="text-gray-400 hover:text-white text-sm transition-colors">Help Center</Link></li>
             </ul>
-          </motion.div>
-
-          {/* Legal Links */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ delay: 0.3 }}
-          >
-            <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-widest mb-4">
-              Legal
-            </h3>
-            <ul className="space-y-3">
-              {[
-                { label: 'Privacy Policy', href: '/privacy' },
-                { label: 'Terms', href: '/' },
-                { label: 'Refund Policy', href: '/' },
-              ].map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-gray-700 hover:text-gray-900 text-sm transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm uppercase tracking-widest mb-3">Legal</h3>
+            <ul className="space-y-2">
+              <li><Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">Terms</Link></li>
+              <li><Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">Refund Policy</Link></li>
             </ul>
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-300 pt-8 sm:pt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-700 text-xs sm:text-sm text-center sm:text-left">
-            © {currentYear} 2XG Growth. All rights reserved.
-          </p>
-          <p className="text-gray-700 text-xs sm:text-sm">
-            Made with ❤️ in India
-          </p>
+        <div className="border-t border-white/10 pt-4 sm:pt-6 flex items-center justify-between text-gray-500 text-[11px] sm:text-sm">
+          <p>© {currentYear} 2XG Growth</p>
+          <p>Made with ❤️ in India</p>
         </div>
       </div>
     </footer>

@@ -130,85 +130,21 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.glass-strong {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid #d1d5db;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-}
-
-/* Grain overlay — subtle on light */
-.grain {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' result='noise' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
-  opacity: 0.015;
-}
-
-/* Dot grid pattern */
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.3;
-}
-
-/* Marquee animation */
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee {
-  animation: marquee 50s linear infinite;
-}
-
-.marquee-reverse {
-  animation: marquee 50s linear infinite reverse;
-}
-
-/* Animated gradient line */
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animated-gradient-line {
+/* Static gradient line — no animation */
+.gradient-line {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--primary-500), var(--accent-500), var(--emerald-400), transparent);
-  background-size: 200% 100%;
-  animation: gradient-shift 4s ease infinite;
 }
 
-/* Glow pulse for interactive elements */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 rgba(59, 130, 246, 0); }
-  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-}
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-.glow-pulse {
-  animation: glow-pulse 3s ease-in-out infinite;
-}
-
-/* Shimmer effect for CTAs */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
