@@ -11,9 +11,10 @@ const plans = [
     price: { monthly: 0, yearly: 0 },
     priceLabel: 'Free',
     cta: 'Start Free Today',
-    ctaLink: 'https://getservice.2xg.in',
+    ctaLink: '/signup?plan=free',
     featured: false,
     badge: null,
+    enterprise: false,
     features: [
       '20 jobs/month',
       '2 mechanic slots',
@@ -30,20 +31,19 @@ const plans = [
     price: { monthly: 499, yearly: 333 },
     priceLabel: null,
     cta: 'Start with ₹249 First Month',
-    ctaLink: 'https://getservice.2xg.in',
+    ctaLink: '/signup?plan=pro',
     featured: true,
     badge: 'FIRST MONTH ₹249',
+    enterprise: false,
     features: [
       'Unlimited jobs/month',
-      'Up to 10 mechanics',
+      'Up to 5 mechanics',
       'WhatsApp auto-alerts',
-      'Google Sheets sync',
-      '90-day job history + analytics',
-      '5 GB photo storage',
-      'Auto Google review collection',
-      'PDF/CSV export reports',
-      'Remove "Powered by 2XG" branding',
-      'Priority WhatsApp support',
+      '30-day job history + analytics',
+      '2 GB photo storage',
+      'CSV export reports',
+      'Manual Google review link',
+      'Standard support',
     ],
   },
   {
@@ -52,22 +52,115 @@ const plans = [
     price: { monthly: 0, yearly: 0 },
     priceLabel: 'Custom',
     cta: 'Talk to Us on WhatsApp',
-    ctaLink: 'mailto:hello@2xg.in',
+    ctaLink: 'https://wa.me/919844223174?text=Hi%2C%20I%27m%20interested%20in%202XG%20Enterprise%20plan',
     featured: false,
     badge: null,
+    enterprise: true,
     features: [
       'Everything in Pro',
       'Unlimited mechanics',
       'Unlimited job history',
       '50 GB photo storage',
       'Multiple shop locations',
+      'Google Sheets sync',
       'Custom logo on receipts',
-      'API access',
+      'Remove "Powered by 2XG" branding',
+      'Auto Google review collection',
+      'PDF export + reports',
+      'Tally/accounting export',
       'Dedicated account manager',
       'On-site onboarding support',
     ],
   },
 ];
+
+function PricingCard({ plan, isYearly }: { plan: typeof plans[0]; isYearly: boolean }) {
+  const isWhatsApp = plan.ctaLink.startsWith('https://wa.me');
+
+  return (
+    <div
+      className={`rounded-2xl p-5 sm:p-7 border transition-shadow flex flex-col min-w-[280px] w-[300px] sm:w-auto flex-shrink-0 sm:flex-shrink ${
+        plan.featured
+          ? 'bg-gradient-to-b from-blue-50 to-white border-primary-300 shadow-xl shadow-primary-100/60 ring-1 ring-primary-200'
+          : plan.enterprise
+          ? 'bg-gradient-to-b from-violet-50/40 to-white border-gray-300 shadow-md shadow-gray-100'
+          : 'bg-white border-gray-300 shadow-md shadow-gray-100'
+      }`}
+    >
+      {/* Badges */}
+      {plan.featured && (
+        <div className="mb-3 flex gap-2 flex-wrap">
+          <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white">
+            Most Popular
+          </div>
+          {plan.badge && (
+            <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200">
+              {plan.badge}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Plan Name */}
+      <h3 className={`font-display font-bold text-lg sm:text-2xl mb-1 ${
+        plan.enterprise ? 'text-violet-900' : 'text-gray-900'
+      }`}>
+        {plan.name}
+      </h3>
+      <p className="text-gray-700 text-sm mb-4 sm:mb-5">{plan.description}</p>
+
+      {/* Price */}
+      <div className="mb-4 sm:mb-5">
+        {plan.priceLabel ? (
+          <p className={`text-3xl sm:text-4xl font-bold ${
+            plan.enterprise ? 'text-violet-900' : 'text-gray-900'
+          }`}>{plan.priceLabel}</p>
+        ) : (
+          <>
+            <span className="text-3xl sm:text-4xl font-bold text-gray-900">
+              ₹{isYearly ? plan.price.yearly : plan.price.monthly}
+            </span>
+            <p className="text-gray-700 text-xs sm:text-sm mt-1">
+              per {isYearly ? 'month (billed yearly)' : 'month'}
+            </p>
+            {plan.featured && (
+              <p className="text-emerald-600 text-xs font-semibold mt-1">
+                {isYearly ? '₹3,999/year — save ₹2,000!' : 'First month only ₹249 — 50% off!'}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* CTA Button */}
+      <Link
+        href={plan.ctaLink}
+        {...(isWhatsApp ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        className={`w-full py-3 rounded-full font-semibold text-sm text-center block active:scale-[0.98] transition-all mb-4 sm:mb-5 ${
+          plan.featured
+            ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/30'
+            : plan.enterprise
+            ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white hover:shadow-lg hover:shadow-violet-500/30'
+            : 'bg-gray-50 border border-gray-300 text-gray-800 hover:bg-gray-100'
+        }`}
+      >
+        {plan.cta} →
+      </Link>
+
+      {/* Features List */}
+      <div className="space-y-2 sm:space-y-2.5 flex-1">
+        {plan.features.map((feature, featureIdx) => (
+          <div key={featureIdx} className="flex items-start gap-2">
+            <Check className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+              plan.enterprise ? 'text-violet-600' : 'text-emerald-600'
+            }`} />
+            <span className="text-gray-800 text-xs sm:text-sm">{feature}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
@@ -121,151 +214,21 @@ export function Pricing() {
           </div>
         </div>
 
-        {/* Pricing Cards — horizontal scroll on mobile, grid on desktop */}
+        {/* Mobile: horizontal scroll */}
         <div className="md:hidden -mx-4 px-4 overflow-x-auto scrollbar-hide">
           <div className="flex gap-4 pb-2" style={{ scrollSnapType: 'x mandatory' }}>
             {plans.map((plan) => (
-              <div
-                key={plan.name}
-                style={{ scrollSnapAlign: 'start' }}
-                className={`rounded-2xl p-5 border transition-shadow flex flex-col min-w-[280px] w-[300px] flex-shrink-0 ${
-                  plan.featured
-                    ? 'bg-gradient-to-b from-blue-50 to-white border-primary-200 shadow-lg shadow-primary-100'
-                    : 'bg-white border-gray-300 shadow-md shadow-gray-100'
-                }`}
-              >
-                {plan.featured && (
-                  <div className="mb-3 flex gap-2 flex-wrap">
-                    <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white">
-                      Most Popular
-                    </div>
-                    {plan.badge && (
-                      <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200">
-                        {plan.badge}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <h3 className="font-display font-bold text-gray-900 text-lg mb-1">{plan.name}</h3>
-                <p className="text-gray-700 text-sm mb-4">{plan.description}</p>
-                <div className="mb-4">
-                  {plan.priceLabel ? (
-                    <p className="text-3xl font-bold text-gray-900">{plan.priceLabel}</p>
-                  ) : (
-                    <>
-                      <span className="text-3xl font-bold text-gray-900">₹{isYearly ? plan.price.yearly : plan.price.monthly}</span>
-                      <p className="text-gray-700 text-xs mt-1">per {isYearly ? 'month (billed yearly)' : 'month'}</p>
-                      {plan.featured && (
-                        <p className="text-emerald-600 text-xs font-semibold mt-1">
-                          {isYearly ? '₹3,999/year — save ₹2,000!' : 'First month only ₹249 — 50% off!'}
-                        </p>
-                      )}
-                    </>
-                  )}
-                </div>
-                <Link
-                  href={plan.ctaLink}
-                  target={plan.ctaLink.startsWith('mailto:') ? undefined : '_blank'}
-                  rel={plan.ctaLink.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                  className={`w-full py-3 rounded-full font-semibold text-sm text-center block active:scale-[0.98] transition-all mb-4 ${
-                    plan.featured
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/30'
-                      : 'bg-gray-50 border border-gray-300 text-gray-800 hover:bg-gray-100'
-                  }`}
-                >
-                  {plan.cta} →
-                </Link>
-                <div className="space-y-2 flex-1">
-                  {plan.features.map((feature, featureIdx) => (
-                    <div key={featureIdx} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-800 text-xs">{feature}</span>
-                    </div>
-                  ))}
-                </div>
+              <div key={plan.name} style={{ scrollSnapAlign: 'start' }}>
+                <PricingCard plan={plan} isYearly={isYearly} />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Desktop grid */}
+        {/* Desktop: 3-column grid */}
         <div className="hidden md:grid md:grid-cols-3 gap-6 items-stretch">
           {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`rounded-2xl p-5 sm:p-7 border transition-shadow flex flex-col ${
-                plan.featured
-                  ? 'bg-gradient-to-b from-blue-50 to-white border-primary-200 shadow-lg shadow-primary-100'
-                  : 'bg-white border-gray-300 shadow-md shadow-gray-100'
-              }`}
-            >
-              {/* Featured Badge */}
-              {plan.featured && (
-                <div className="mb-4 flex gap-2 flex-wrap">
-                  <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-primary-500 to-accent-500 text-white">
-                    Most Popular
-                  </div>
-                  {plan.badge && (
-                    <div className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-600 border border-emerald-200">
-                      {plan.badge}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Plan Name */}
-              <h3 className="font-display font-bold text-gray-900 text-lg sm:text-2xl mb-1">
-                {plan.name}
-              </h3>
-              <p className="text-gray-700 text-sm mb-5">{plan.description}</p>
-
-              {/* Price */}
-              <div className="mb-5">
-                {plan.priceLabel ? (
-                  <p className="text-3xl sm:text-4xl font-bold text-gray-900">{plan.priceLabel}</p>
-                ) : (
-                  <>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl sm:text-4xl font-bold text-gray-900">
-                        ₹{isYearly ? plan.price.yearly : plan.price.monthly}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 text-xs sm:text-sm mt-1">
-                      per {isYearly ? 'month (billed yearly)' : 'month'}
-                    </p>
-                    {plan.featured && (
-                      <p className="text-emerald-600 text-xs font-semibold mt-1">
-                        {isYearly ? '₹3,999/year — save ₹2,000!' : 'First month only ₹249 — 50% off!'}
-                      </p>
-                    )}
-                  </>
-                )}
-              </div>
-
-              {/* CTA Button */}
-              <Link
-                href={plan.ctaLink}
-                target={plan.ctaLink.startsWith('mailto:') ? undefined : '_blank'}
-                rel={plan.ctaLink.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
-                className={`w-full py-3 rounded-full font-semibold text-sm text-center block active:scale-[0.98] transition-all mb-5 ${
-                  plan.featured
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg hover:shadow-primary-500/30'
-                    : 'bg-gray-50 border border-gray-300 text-gray-800 hover:bg-gray-100'
-                }`}
-              >
-                {plan.cta} →
-              </Link>
-
-              {/* Features List */}
-              <div className="space-y-2.5 flex-1">
-                {plan.features.map((feature, featureIdx) => (
-                  <div key={featureIdx} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-800 text-sm">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <PricingCard key={plan.name} plan={plan} isYearly={isYearly} />
           ))}
         </div>
       </div>
