@@ -22,7 +22,7 @@ function SignupForm() {
   const plan = planParam === 'pro' ? 'pro' : 'free';
 
   const [form, setForm] = useState({
-    shopName: '', ownerName: '', email: '', password: '', phone: '', address: '',
+    shopName: '', shortCode: '', ownerName: '', email: '', password: '', phone: '', address: '',
   });
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,9 +33,12 @@ function SignupForm() {
   useEffect(() => {
     const s = form.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     setSlug(s);
+    // Suggest short code only if user hasn't typed one
+    if (!form.shortCode) {
+      const suggested = form.shopName.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase();
+      if (suggested.length >= 2) setForm(p => ({ ...p, shortCode: suggested }));
+    }
   }, [form.shopName]);
-
-  const shortCode = form.shopName.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +106,7 @@ function SignupForm() {
       const { data, error: rpcError } = await supabase.rpc('public_register_org', {
         p_org_name: form.shopName.trim(),
         p_org_slug: slug,
-        p_org_short_code: shortCode || 'SHOP',
+        p_org_short_code: form.shortCode.toUpperCase() || 'SHOP',
         p_owner_name: form.ownerName.trim(),
         p_owner_email: form.email.trim().toLowerCase(),
         p_owner_password: form.password,
@@ -193,23 +196,37 @@ function SignupForm() {
           <p className="text-sm text-gray-500 text-center mb-6">Set up in 2 minutes. No technical skills needed.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Shop Name */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Shop Name *</label>
-              <input
-                type="text"
-                value={form.shopName}
-                onChange={(e) => setForm(p => ({ ...p, shopName: e.target.value }))}
-                placeholder="e.g. Bharath Cycle Hub"
-                required
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-              />
-              {slug && (
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span>
-                </p>
-              )}
+            {/* Shop Name + Short Code */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="col-span-2">
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Shop Name *</label>
+                <input
+                  type="text"
+                  value={form.shopName}
+                  onChange={(e) => setForm(p => ({ ...p, shopName: e.target.value }))}
+                  placeholder="e.g. Bharath Cycle Hub"
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Short Code *</label>
+                <input
+                  type="text"
+                  value={form.shortCode}
+                  onChange={(e) => setForm(p => ({ ...p, shortCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
+                  placeholder="BCH"
+                  required
+                  maxLength={5}
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm font-mono text-center uppercase focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                />
+              </div>
             </div>
+            {slug && (
+              <p className="text-[10px] text-gray-400 -mt-2">
+                Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span> &middot; Code: <span className="font-mono text-blue-600">{form.shortCode || '—'}</span>
+              </p>
+            )}
 
             {/* Owner Name */}
             <div>
