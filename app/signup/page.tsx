@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import Script from 'next/script';
 import { Check, Loader2, ArrowLeft, Crown } from 'lucide-react';
@@ -103,31 +102,35 @@ function SignupForm() {
     setError(null);
 
     try {
-      const { data, error: rpcError } = await supabase.rpc('public_register_org', {
-        p_org_name: form.shopName.trim(),
-        p_org_slug: slug,
-        p_org_short_code: form.shortCode.toUpperCase() || 'SHOP',
-        p_owner_name: form.ownerName.trim(),
-        p_owner_email: form.email.trim().toLowerCase(),
-        p_owner_password: form.password,
-        p_owner_phone: form.phone.trim() || null,
-        p_org_phone: form.phone.trim() || null,
-        p_org_address: form.address.trim() || null,
-        p_plan_type: plan,
-        p_razorpay_payment_id: paymentId,
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orgName: form.shopName.trim(),
+          orgSlug: slug,
+          orgShortCode: form.shortCode.toUpperCase() || 'SHOP',
+          orgPhone: form.phone.trim() || null,
+          orgAddress: form.address.trim() || null,
+          ownerName: form.ownerName.trim(),
+          ownerEmail: form.email.trim().toLowerCase(),
+          ownerPassword: form.password,
+          ownerPhone: form.phone.trim() || null,
+          planType: plan,
+          razorpayPaymentId: paymentId,
+        }),
       });
 
-      if (rpcError) throw rpcError;
+      const data = await res.json();
 
-      if (data && data.success) {
-        setSuccess({ slug: data.org_slug, plan });
-        // Auto-redirect after 3 seconds
-        setTimeout(() => {
-          window.location.href = `https://service.2xg.in/${data.org_slug}/admin/dashboard`;
-        }, 3000);
-      } else {
-        throw new Error(data?.error || 'Registration failed');
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Registration failed');
       }
+
+      setSuccess({ slug: data.org_slug, plan });
+      // Auto-redirect after 3 seconds
+      setTimeout(() => {
+        window.location.href = `https://service.2xg.in/${data.org_slug}/admin/dashboard`;
+      }, 3000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
       setError(msg);
