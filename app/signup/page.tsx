@@ -27,17 +27,62 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ slug: string; plan: string } | null>(null);
+  const [slugTaken, setSlugTaken] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
+  const [slugChecking, setSlugChecking] = useState(false);
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  // Password strength checker
+  const checkPasswordStrength = (pw: string): number => {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[a-z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return score;
+  };
 
   // Auto-generate slug from shop name
   useEffect(() => {
     const s = form.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     setSlug(s);
-    // Suggest short code only if user hasn't typed one
     if (!form.shortCode) {
       const suggested = form.shopName.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase();
       if (suggested.length >= 2) setForm(p => ({ ...p, shortCode: suggested }));
     }
   }, [form.shopName]);
+
+  // Real-time slug availability check (debounced)
+  useEffect(() => {
+    if (!slug || slug.length < 3) { setSlugTaken(false); return; }
+    setSlugChecking(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/check-availability?type=slug&value=${encodeURIComponent(slug)}`);
+        const data = await res.json();
+        setSlugTaken(data.taken);
+      } catch { setSlugTaken(false); }
+      setSlugChecking(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [slug]);
+
+  // Real-time email availability check (debounced)
+  useEffect(() => {
+    if (!form.email || !form.email.includes('@')) { setEmailTaken(false); return; }
+    setEmailChecking(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/check-availability?type=email&value=${encodeURIComponent(form.email.trim().toLowerCase())}`);
+        const data = await res.json();
+        setEmailTaken(data.taken);
+      } catch { setEmailTaken(false); }
+      setEmailChecking(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [form.email]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,12 +92,28 @@ function SignupForm() {
       setError('Please fill in all required fields');
       return;
     }
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length !== 10) {
+      setError('Enter a valid 10-digit phone number');
+      return;
+    }
+    if (!form.address.trim()) {
+      setError('Enter your city');
+      return;
+    }
+    if (passwordStrength < 3) {
+      setError('Password too weak. Use 8+ characters with uppercase, lowercase, number, and special character.');
       return;
     }
     if (!slug) {
       setError('Shop name generates an invalid URL. Try a different name.');
+      return;
+    }
+    if (slugTaken) {
+      setError('This shop URL is already taken. Try a different shop name.');
+      return;
+    }
+    if (emailTaken) {
+      setError('This email is already registered. Please login instead.');
       return;
     }
 
@@ -226,9 +287,17 @@ function SignupForm() {
               </div>
             </div>
             {slug && (
-              <p className="text-[10px] text-gray-400 -mt-2">
-                Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span> &middot; Code: <span className="font-mono text-blue-600">{form.shortCode || '—'}</span>
-              </p>
+              <div className="text-[10px] -mt-2 flex items-center gap-2">
+                <p className="text-gray-400">
+                  Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span> &middot; Code: <span className="font-mono text-blue-600">{form.shortCode || '—'}</span>
+                </p>
+                {slugChecking && <span className="text-gray-400">checking...</span>}
+                {!slugChecking && slug.length >= 3 && (
+                  slugTaken
+                    ? <span className="text-red-500 font-semibold">URL taken!</span>
+                    : <span className="text-green-600 font-semibold">✓ available</span>
+                )}
+              </div>
             )}
 
             {/* Owner Name */}
@@ -244,52 +313,78 @@ function SignupForm() {
               />
             </div>
 
-            {/* Email + Password */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))}
-                  placeholder="you@email.com"
-                  required
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Password *</label>
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => setForm(p => ({ ...p, password: e.target.value }))}
-                  placeholder="Min 6 characters"
-                  required
-                  minLength={6}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                />
-              </div>
+            {/* Email */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => { setForm(p => ({ ...p, email: e.target.value })); setEmailTaken(false); }}
+                placeholder="you@email.com"
+                required
+                className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                  emailTaken ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
+                }`}
+              />
+              {emailChecking && <p className="text-[10px] text-gray-400 mt-1">Checking availability...</p>}
+              {emailTaken && <p className="text-[10px] text-red-500 font-semibold mt-1">This email is already registered. <a href="https://service.2xg.in" className="text-blue-600 underline">Login instead →</a></p>}
             </div>
 
-            {/* Phone + Address (optional) */}
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Password *</label>
+              <input
+                type="password"
+                value={form.password}
+                onChange={(e) => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(checkPasswordStrength(e.target.value)); }}
+                placeholder="Min 8 chars, uppercase, number, special"
+                required
+                minLength={8}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+              />
+              {form.password && (
+                <div className="mt-1.5 flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className={`flex-1 rounded-full transition-all ${
+                        passwordStrength >= i
+                          ? passwordStrength <= 2 ? 'bg-red-400' : passwordStrength <= 3 ? 'bg-yellow-400' : 'bg-green-500'
+                          : 'bg-gray-200'
+                      }`} />
+                    ))}
+                  </div>
+                  <span className={`text-[10px] font-semibold ${
+                    passwordStrength <= 2 ? 'text-red-500' : passwordStrength <= 3 ? 'text-yellow-600' : 'text-green-600'
+                  }`}>
+                    {passwordStrength <= 2 ? 'Weak' : passwordStrength <= 3 ? 'Fair' : passwordStrength <= 4 ? 'Strong' : 'Very Strong'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Phone + City (required) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone *</label>
                 <input
                   type="tel"
                   value={form.phone}
-                  onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))}
-                  placeholder="9844223174"
+                  onChange={(e) => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                  placeholder="10-digit mobile"
+                  required
+                  inputMode="numeric"
+                  maxLength={10}
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">City</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">City *</label>
                 <input
                   type="text"
                   value={form.address}
                   onChange={(e) => setForm(p => ({ ...p, address: e.target.value }))}
                   placeholder="Bangalore"
+                  required
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
                 />
               </div>

@@ -103,9 +103,7 @@ export function Hero() {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href="https://getservice.2xg.in"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/signup?plan=free"
                 className="inline-flex w-full sm:w-auto items-center justify-center gap-2 px-6 py-3 sm:py-3.5 rounded-full text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98] transition-all"
               >
                 Start Free — No Card Needed →

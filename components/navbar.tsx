@@ -73,9 +73,7 @@ export function Navbar() {
           {/* CTA Button */}
           <div className="hidden md:block">
             <Link
-              href="https://getservice.2xg.in"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/signup?plan=free"
               className="px-4 sm:px-6 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/30 transition-shadow"
             >
               Get Started
@@ -111,7 +109,7 @@ export function Navbar() {
                 </Link>
               ))}
               <Link
-                href="https://getservice.2xg.in"
+                href="/signup?plan=free"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsMobileMenuOpen(false)}

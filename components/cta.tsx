@@ -47,16 +47,16 @@ export function CTA() {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Link
-            href="https://getservice.2xg.in"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/signup?plan=free"
             className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-full text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98] transition-all"
           >
             Claim Your Free Trial →
           </Link>
 
           <Link
-            href="mailto:hello@2xg.in"
+            href="https://wa.me/919844223174?text=Hi%2C%20I%27m%20interested%20in%202XG%20Service"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-full text-sm sm:text-base font-semibold text-gray-800 bg-white hover:bg-gray-50 active:scale-[0.98] transition-all border border-gray-300 shadow-sm"
           >
             WhatsApp Us
@@ -65,7 +65,7 @@ export function CTA() {
 
         {/* Trust Line */}
         <p className="text-[10px] sm:text-sm tracking-[0.15em] sm:tracking-[0.2em] uppercase font-semibold text-gray-700 pt-4 border-t border-gray-300">
-          NO CREDIT CARD • FREE FOREVER PLAN • 2 MIN SETUP • WORKS IN HINDI & ENGLISH
+          NO CREDIT CARD • FREE FOREVER PLAN • 2 MIN SETUP • 500+ WORKSHOPS TRUST US
         </p>
       </div>
     </section>
