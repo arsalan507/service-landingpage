@@ -7,6 +7,14 @@ const supabaseAdmin = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
+// Must match the list in register/route.ts
+const RESERVED_SLUGS = new Set([
+  'admin', 'api', 'login', 'signup', 'register', 'dashboard',
+  'app', 'www', 'help', 'support', 'billing', 'settings',
+  'auth', 'oauth', 'callback', 'webhook', 'webhooks',
+  'static', 'assets', 'public', 'health', 'status',
+]);
+
 export async function GET(request: NextRequest) {
   const type = request.nextUrl.searchParams.get('type');
   const value = request.nextUrl.searchParams.get('value');
@@ -18,12 +26,19 @@ export async function GET(request: NextRequest) {
   try {
     if (type === 'slug') {
       const slug = value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '');
-      if (slug.length < 3) return NextResponse.json({ taken: false });
+      if (slug.length < 2) return NextResponse.json({ taken: false });
 
+      // Check reserved slugs
+      if (RESERVED_SLUGS.has(slug)) {
+        return NextResponse.json({ taken: true, reason: 'reserved' });
+      }
+
+      // Only check active orgs — soft-deleted ones don't block new signups
       const { data } = await supabaseAdmin
         .from('organizations')
         .select('id')
         .eq('slug', slug)
+        .eq('is_active', true)
         .maybeSingle();
 
       return NextResponse.json({ taken: !!data });
@@ -31,23 +46,11 @@ export async function GET(request: NextRequest) {
 
     if (type === 'email') {
       const email = value.toLowerCase().trim();
-      // Check users table (linked to auth) instead of listing all auth users
       const { data } = await supabaseAdmin
         .from('users')
         .select('id')
         .eq('email', email)
         .maybeSingle();
-      return NextResponse.json({ taken: !!data });
-    }
-
-    if (type === 'shortcode') {
-      const code = value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      const { data } = await supabaseAdmin
-        .from('organizations')
-        .select('id')
-        .eq('short_code', code)
-        .maybeSingle();
-
       return NextResponse.json({ taken: !!data });
     }
 

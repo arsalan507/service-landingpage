@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
-import { Check, Loader2, ArrowLeft, Crown } from 'lucide-react';
+import { Check, Loader2, ArrowLeft, Crown, Eye, EyeOff } from 'lucide-react';
 
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY || 'rzp_test_SYYpnpaMsN5Uwn';
 
@@ -16,12 +16,11 @@ declare global {
 
 function SignupForm() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const planParam = searchParams.get('plan') || 'free';
   const plan = planParam === 'pro' ? 'pro' : 'free';
 
   const [form, setForm] = useState({
-    shopName: '', shortCode: '', ownerName: '', email: '', password: '', phone: '', address: '',
+    shopName: '', ownerName: '', email: '', password: '', phone: '', address: '',
   });
   const [slug, setSlug] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +31,11 @@ function SignupForm() {
   const [slugChecking, setSlugChecking] = useState(false);
   const [emailChecking, setEmailChecking] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // AbortControllers to cancel stale availability requests
+  const slugAbort = useRef<AbortController | null>(null);
+  const emailAbort = useRef<AbortController | null>(null);
 
   // Password strength checker
   const checkPasswordStrength = (pw: string): number => {
@@ -46,27 +50,36 @@ function SignupForm() {
 
   // Auto-generate slug from shop name
   useEffect(() => {
-    const s = form.shopName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const s = form.shopName
+      .toLowerCase()
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
     setSlug(s);
-    if (!form.shortCode) {
-      const suggested = form.shopName.replace(/[^A-Za-z]/g, '').substring(0, 4).toUpperCase();
-      if (suggested.length >= 2) setForm(p => ({ ...p, shortCode: suggested }));
-    }
   }, [form.shopName]);
 
-  // Real-time slug availability check (debounced)
+  // Real-time slug availability check (debounced + AbortController)
   useEffect(() => {
-    if (!slug || slug.length < 3) { setSlugTaken(false); return; }
+    if (!slug || slug.length < 3) { setSlugTaken(false); setSlugChecking(false); return; }
     setSlugChecking(true);
     const timer = setTimeout(async () => {
+      // Cancel any previous in-flight request
+      slugAbort.current?.abort();
+      const controller = new AbortController();
+      slugAbort.current = controller;
       try {
-        const res = await fetch(`/api/check-availability?type=slug&value=${encodeURIComponent(slug)}`);
+        const res = await fetch(`/api/check-availability?type=slug&value=${encodeURIComponent(slug)}`, { signal: controller.signal });
         const data = await res.json();
-        setSlugTaken(data.taken);
-      } catch { setSlugTaken(false); }
-      setSlugChecking(false);
-    }, 500);
-    return () => clearTimeout(timer);
+        if (!controller.signal.aborted) {
+          setSlugTaken(data.taken);
+          setSlugChecking(false);
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return; // expected
+        if (!controller.signal.aborted) { setSlugTaken(false); setSlugChecking(false); }
+      }
+    }, 700);
+    return () => { clearTimeout(timer); slugAbort.current?.abort(); };
   }, [slug]);
 
   // Real-time email availability check — only when email looks valid
@@ -74,24 +87,29 @@ function SignupForm() {
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) { setEmailTaken(false); setEmailChecking(false); return; }
     setEmailChecking(true);
     const timer = setTimeout(async () => {
+      emailAbort.current?.abort();
+      const controller = new AbortController();
+      emailAbort.current = controller;
       try {
-        const res = await fetch(`/api/check-availability?type=email&value=${encodeURIComponent(form.email.trim().toLowerCase())}`);
+        const res = await fetch(`/api/check-availability?type=email&value=${encodeURIComponent(form.email.trim().toLowerCase())}`, { signal: controller.signal });
         const data = await res.json();
-        setEmailTaken(data.taken);
-      } catch { setEmailTaken(false); }
-      setEmailChecking(false);
-    }, 500);
-    return () => clearTimeout(timer);
+        if (!controller.signal.aborted) {
+          setEmailTaken(data.taken);
+          setEmailChecking(false);
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+        if (!controller.signal.aborted) { setEmailTaken(false); setEmailChecking(false); }
+      }
+    }, 700);
+    return () => { clearTimeout(timer); emailAbort.current?.abort(); };
   }, [form.email]);
 
-  /** Map raw DB/auth errors to user-friendly messages */
+  /** Map API error codes to user-friendly messages */
   const friendlyError = (msg: string): string => {
     const lower = msg.toLowerCase();
-    if (lower.includes('unique constraint') && lower.includes('short_code')) return 'This shop code is already taken. Try a different one.';
-    if (lower.includes('unique constraint') && lower.includes('slug')) return 'This shop URL is already taken. Try a different shop name.';
-    if (lower.includes('unique constraint')) return 'A shop with this name already exists. Try a different name.';
     if (lower.includes('already registered') || lower.includes('already been registered')) return 'This email is already registered. Try logging in instead.';
-    if (lower.includes('too many') || lower.includes('rate limit') || lower.includes('email rate limit')) return 'Too many attempts. Please wait 2-3 minutes before trying again.';
+    if (lower.includes('too many') || lower.includes('rate limit') || lower.includes('email rate limit')) return 'Too many attempts. Please wait before trying again.';
     if (lower.includes('invalid email')) return 'Please enter a valid email address.';
     if (lower.includes('password') && lower.includes('weak')) return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and numbers.';
     if (lower.includes('network') || lower.includes('fetch')) return 'Network error. Check your internet connection and try again.';
@@ -118,12 +136,12 @@ function SignupForm() {
       setError('Password too weak. Use 8+ characters with uppercase, lowercase, number, and special character.');
       return;
     }
-    if (!slug) {
-      setError('Shop name generates an invalid URL. Try a different name.');
+    if (!slug || slug.length < 2) {
+      setError('Shop name must contain at least 2 letters or numbers.');
       return;
     }
     if (slugTaken) {
-      setError('This shop URL is already taken. Try a different shop name.');
+      setError('This shop name is already taken. Try a different name.');
       return;
     }
     if (emailTaken) {
@@ -183,7 +201,6 @@ function SignupForm() {
         body: JSON.stringify({
           orgName: form.shopName.trim(),
           orgSlug: slug,
-          orgShortCode: form.shortCode.toUpperCase() || 'SHOP',
           orgPhone: form.phone.trim() || null,
           orgAddress: form.address.trim() || null,
           ownerName: form.ownerName.trim(),
@@ -198,11 +215,10 @@ function SignupForm() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.message || data.error || 'Registration failed');
       }
 
       setSuccess({ slug: data.org_slug, plan });
-      // Auto-redirect after 3 seconds
       setTimeout(() => {
         window.location.href = `https://service.2xg.in/${data.org_slug}/admin/dashboard`;
       }, 3000);
@@ -222,28 +238,30 @@ function SignupForm() {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check size={32} className="text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your shop is ready! 🎉</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your shop is ready!</h1>
           <p className="text-gray-600 mb-1">
             <strong>{form.shopName}</strong>
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            {success.plan === 'pro' ? '⚡ Pro Plan activated' : '🆓 Free Plan'}
+            {success.plan === 'pro' ? 'Pro Plan activated' : 'Free Plan'}
           </p>
           <p className="text-xs text-gray-400 mb-6">Redirecting to your dashboard...</p>
           <a
             href={`https://service.2xg.in/${success.slug}/admin/dashboard`}
             className="inline-block w-full py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors"
           >
-            Go to Dashboard →
+            Go to Dashboard
           </a>
         </div>
       </div>
     );
   }
 
+  const isChecking = slugChecking || emailChecking;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-4 py-10">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      {plan === 'pro' && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />}
 
       <div className="w-full max-w-md">
         {/* Back link */}
@@ -260,7 +278,7 @@ function SignupForm() {
                   <Crown size={12} /> Pro Plan
                 </span>
                 <span className="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
-                  ₹249/first month
+                  Rs.249/first month
                 </span>
               </div>
             ) : (
@@ -274,50 +292,41 @@ function SignupForm() {
           <p className="text-sm text-gray-500 text-center mb-6">Set up in 2 minutes. No technical skills needed.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Shop Name + Short Code */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Shop Name *</label>
-                <input
-                  type="text"
-                  value={form.shopName}
-                  onChange={(e) => setForm(p => ({ ...p, shopName: e.target.value }))}
-                  placeholder="e.g. Bharath Cycle Hub"
-                  required
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Short Code *</label>
-                <input
-                  type="text"
-                  value={form.shortCode}
-                  onChange={(e) => setForm(p => ({ ...p, shortCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
-                  placeholder="BCH"
-                  required
-                  maxLength={5}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm font-mono text-center uppercase focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                />
-              </div>
+            {/* Shop Name */}
+            <div>
+              <label htmlFor="shopName" className="block text-xs font-semibold text-gray-600 mb-1">Shop Name *</label>
+              <input
+                id="shopName"
+                type="text"
+                value={form.shopName}
+                onChange={(e) => setForm(p => ({ ...p, shopName: e.target.value }))}
+                placeholder="e.g. Bharath Cycle Hub"
+                required
+                autoFocus
+                className={`w-full px-3 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+                  slugTaken ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'
+                }`}
+              />
+              {slug && slug.length >= 3 && (
+                <div className="text-[10px] mt-1 flex items-center gap-2">
+                  <p className="text-gray-400">
+                    Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span>
+                  </p>
+                  {slugChecking && <span className="text-gray-400">checking...</span>}
+                  {!slugChecking && (
+                    slugTaken
+                      ? <span className="text-red-500 font-semibold">taken</span>
+                      : <span className="text-green-600 font-semibold">available</span>
+                  )}
+                </div>
+              )}
             </div>
-            {slug && (
-              <div className="text-[10px] -mt-2 flex items-center gap-2">
-                <p className="text-gray-400">
-                  Your URL: service.2xg.in/<span className="font-mono text-blue-600">{slug}</span> &middot; Code: <span className="font-mono text-blue-600">{form.shortCode || '—'}</span>
-                </p>
-                {slugChecking && <span className="text-gray-400">checking...</span>}
-                {!slugChecking && slug.length >= 3 && (
-                  slugTaken
-                    ? <span className="text-red-500 font-semibold">URL taken!</span>
-                    : <span className="text-green-600 font-semibold">✓ available</span>
-                )}
-              </div>
-            )}
 
             {/* Owner Name */}
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Your Name *</label>
+              <label htmlFor="ownerName" className="block text-xs font-semibold text-gray-600 mb-1">Your Name *</label>
               <input
+                id="ownerName"
                 type="text"
                 value={form.ownerName}
                 onChange={(e) => setForm(p => ({ ...p, ownerName: e.target.value }))}
@@ -329,8 +338,9 @@ function SignupForm() {
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
               <input
+                id="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => { setForm(p => ({ ...p, email: e.target.value })); setEmailTaken(false); }}
@@ -341,21 +351,32 @@ function SignupForm() {
                 }`}
               />
               {emailChecking && <p className="text-[10px] text-gray-400 mt-1">Checking availability...</p>}
-              {emailTaken && <p className="text-[10px] text-red-500 font-semibold mt-1">This email is already registered. <a href="https://service.2xg.in" className="text-blue-600 underline">Login instead →</a></p>}
+              {emailTaken && <p className="text-[10px] text-red-500 font-semibold mt-1">This email is already registered. <a href="https://service.2xg.in" className="text-blue-600 underline">Login instead</a></p>}
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Password *</label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={(e) => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(checkPasswordStrength(e.target.value)); }}
-                placeholder="Min 8 chars, uppercase, number, special"
-                required
-                minLength={8}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-              />
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-600 mb-1">Password *</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={(e) => { setForm(p => ({ ...p, password: e.target.value })); setPasswordStrength(checkPasswordStrength(e.target.value)); }}
+                  placeholder="Min 8 chars, uppercase, number, special"
+                  required
+                  minLength={8}
+                  className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {form.password && (
                 <div className="mt-1.5 flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden flex gap-0.5">
@@ -376,27 +397,32 @@ function SignupForm() {
               )}
             </div>
 
-            {/* Phone + City (required) */}
+            {/* Phone + City */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Phone *</label>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                  placeholder="10-digit mobile"
-                  required
-                  inputMode="numeric"
-                  maxLength={10}
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
-                />
+                <label htmlFor="phone" className="block text-xs font-semibold text-gray-600 mb-1">Phone *</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 select-none">+91</span>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => setForm(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                    placeholder="10-digit mobile"
+                    required
+                    inputMode="numeric"
+                    maxLength={10}
+                    className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                  />
+                </div>
                 {form.phone.length === 10 && !/^[6-9]/.test(form.phone) && (
                   <p className="text-[10px] text-red-500 mt-1">Indian mobile numbers start with 6-9</p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">City *</label>
+                <label htmlFor="city" className="block text-xs font-semibold text-gray-600 mb-1">City *</label>
                 <input
+                  id="city"
                   type="text"
                   value={form.address}
                   onChange={(e) => setForm(p => ({ ...p, address: e.target.value }))}
@@ -411,16 +437,13 @@ function SignupForm() {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs text-red-700">
                 {error}
-                {error.includes('already registered') && (
-                  <a href="https://service.2xg.in" className="ml-1 text-blue-600 font-semibold underline">Login instead →</a>
-                )}
               </div>
             )}
 
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading || slugTaken || emailTaken}
+              disabled={loading || slugTaken || emailTaken || isChecking}
               className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60 cursor-pointer ${
                 plan === 'pro'
                   ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/30'
@@ -429,25 +452,28 @@ function SignupForm() {
             >
               {loading && <Loader2 size={16} className="animate-spin" />}
               {plan === 'pro'
-                ? loading ? 'Processing...' : 'Pay ₹249 & Create Account'
+                ? loading ? 'Processing...' : 'Pay Rs.249 & Create Account'
                 : loading ? 'Creating...' : 'Create Free Account'
               }
             </button>
 
             {/* Terms */}
             <p className="text-[10px] text-gray-400 text-center">
-              By signing up, you agree to our terms of service and privacy policy.
+              By signing up, you agree to our{' '}
+              <a href="/terms" className="underline hover:text-gray-600">terms of service</a>{' '}
+              and{' '}
+              <a href="/privacy" className="underline hover:text-gray-600">privacy policy</a>.
             </p>
 
             {/* Switch plan */}
             <div className="text-center pt-2 border-t border-gray-100">
               {plan === 'pro' ? (
                 <Link href="/signup?plan=free" className="text-xs text-gray-500 hover:text-blue-600">
-                  Want to start free instead? →
+                  Want to start free instead?
                 </Link>
               ) : (
                 <Link href="/signup?plan=pro" className="text-xs text-gray-500 hover:text-blue-600">
-                  Want unlimited jobs? Start Pro at ₹249 →
+                  Want unlimited jobs? Start Pro at Rs.249
                 </Link>
               )}
             </div>
