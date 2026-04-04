@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     if (isRateLimited(ip)) {
       return NextResponse.json(
-        { success: false, error: 'Too many signups. Please try again later.' },
+        { success: false, error: 'Too many attempts. Please wait 2-3 minutes before trying again.' },
         { status: 429 }
       );
     }
@@ -61,8 +61,11 @@ export async function POST(request: NextRequest) {
     if (!ownerName || !ownerEmail || !ownerPassword) {
       return NextResponse.json({ success: false, error: 'Name, email, and password are required' }, { status: 400 });
     }
-    if (ownerPassword.length < 6) {
-      return NextResponse.json({ success: false, error: 'Password must be at least 6 characters' }, { status: 400 });
+    if (ownerPassword.length < 8 || !/[A-Z]/.test(ownerPassword) || !/[0-9]/.test(ownerPassword)) {
+      return NextResponse.json({ success: false, error: 'Password must be at least 8 characters with an uppercase letter and a number' }, { status: 400 });
+    }
+    if (ownerPhone && !/^[6-9]\d{9}$/.test(ownerPhone.replace(/\D/g, ''))) {
+      return NextResponse.json({ success: false, error: 'Enter a valid Indian mobile number (starts with 6-9)' }, { status: 400 });
     }
     if (!['free', 'pro'].includes(planType)) {
       return NextResponse.json({ success: false, error: 'Invalid plan type' }, { status: 400 });
@@ -139,7 +142,12 @@ export async function POST(request: NextRequest) {
     if (orgError || !orgData) {
       // Rollback: delete auth user
       await supabaseAdmin.auth.admin.deleteUser(authUserId);
-      return NextResponse.json({ success: false, error: orgError?.message || 'Failed to create organization' }, { status: 500 });
+      const raw = (orgError?.message || '').toLowerCase();
+      let friendlyMsg = 'Failed to create organization. Please try again.';
+      if (raw.includes('unique constraint') && raw.includes('short_code')) friendlyMsg = 'This shop code is already taken. Try a different one.';
+      else if (raw.includes('unique constraint') && raw.includes('slug')) friendlyMsg = 'This shop URL is already taken. Try a different shop name.';
+      else if (raw.includes('unique constraint')) friendlyMsg = 'A shop with this name already exists. Try a different name.';
+      return NextResponse.json({ success: false, error: friendlyMsg }, { status: 409 });
     }
 
     // 4. Create owner user
@@ -198,8 +206,15 @@ export async function POST(request: NextRequest) {
 
   } catch (err) {
     console.error('[register] error:', err);
+    const raw = err instanceof Error ? err.message : '';
+    const lower = raw.toLowerCase();
+    let msg = 'Something went wrong. Please try again.';
+    if (lower.includes('unique constraint') && lower.includes('short_code')) msg = 'This shop code is already taken. Try a different one.';
+    else if (lower.includes('unique constraint') && lower.includes('slug')) msg = 'This shop URL is already taken. Try a different shop name.';
+    else if (lower.includes('unique constraint')) msg = 'A shop with this name already exists. Try a different name.';
+    else if (lower.includes('network') || lower.includes('fetch')) msg = 'Network error. Check your connection and try again.';
     return NextResponse.json(
-      { success: false, error: 'Something went wrong. Please try again.' },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

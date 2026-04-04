@@ -69,9 +69,9 @@ function SignupForm() {
     return () => clearTimeout(timer);
   }, [slug]);
 
-  // Real-time email availability check (debounced)
+  // Real-time email availability check — only when email looks valid
   useEffect(() => {
-    if (!form.email || !form.email.includes('@')) { setEmailTaken(false); return; }
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) { setEmailTaken(false); setEmailChecking(false); return; }
     setEmailChecking(true);
     const timer = setTimeout(async () => {
       try {
@@ -84,6 +84,20 @@ function SignupForm() {
     return () => clearTimeout(timer);
   }, [form.email]);
 
+  /** Map raw DB/auth errors to user-friendly messages */
+  const friendlyError = (msg: string): string => {
+    const lower = msg.toLowerCase();
+    if (lower.includes('unique constraint') && lower.includes('short_code')) return 'This shop code is already taken. Try a different one.';
+    if (lower.includes('unique constraint') && lower.includes('slug')) return 'This shop URL is already taken. Try a different shop name.';
+    if (lower.includes('unique constraint')) return 'A shop with this name already exists. Try a different name.';
+    if (lower.includes('already registered') || lower.includes('already been registered')) return 'This email is already registered. Try logging in instead.';
+    if (lower.includes('too many') || lower.includes('rate limit') || lower.includes('email rate limit')) return 'Too many attempts. Please wait 2-3 minutes before trying again.';
+    if (lower.includes('invalid email')) return 'Please enter a valid email address.';
+    if (lower.includes('password') && lower.includes('weak')) return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and numbers.';
+    if (lower.includes('network') || lower.includes('fetch')) return 'Network error. Check your internet connection and try again.';
+    return msg;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -92,8 +106,8 @@ function SignupForm() {
       setError('Please fill in all required fields');
       return;
     }
-    if (!form.phone.trim() || form.phone.replace(/\D/g, '').length !== 10) {
-      setError('Enter a valid 10-digit phone number');
+    if (!form.phone.trim() || !/^[6-9]\d{9}$/.test(form.phone.replace(/\D/g, ''))) {
+      setError('Enter a valid Indian mobile number (starts with 6-9, 10 digits)');
       return;
     }
     if (!form.address.trim()) {
@@ -193,8 +207,8 @@ function SignupForm() {
         window.location.href = `https://service.2xg.in/${data.org_slug}/admin/dashboard`;
       }, 3000);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
-      setError(msg);
+      const raw = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(friendlyError(raw));
     } finally {
       setLoading(false);
     }
@@ -376,6 +390,9 @@ function SignupForm() {
                   maxLength={10}
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
                 />
+                {form.phone.length === 10 && !/^[6-9]/.test(form.phone) && (
+                  <p className="text-[10px] text-red-500 mt-1">Indian mobile numbers start with 6-9</p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">City *</label>
@@ -403,7 +420,7 @@ function SignupForm() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || slugTaken || emailTaken}
               className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60 cursor-pointer ${
                 plan === 'pro'
                   ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-lg hover:shadow-blue-500/30'
