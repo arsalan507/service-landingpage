@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'framer-motion';
 
 const stats = [
   { number: 15000, label: 'Bikes Serviced', suffix: '+', color: 'text-blue-600' },
@@ -13,34 +12,45 @@ const stats = [
 function CountUpStat({ target, label, suffix, color }: { target: number; label: string; suffix: string; color: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const hasAnimated = useRef(false);
 
   useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
-    hasAnimated.current = true;
+    const el = ref.current;
+    if (!el) return;
 
-    const duration = 1500;
-    const startTime = performance.now();
-    const isDecimal = target % 1 !== 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || hasAnimated.current) return;
+        hasAnimated.current = true;
+        observer.disconnect();
 
-    const animate = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = target * eased;
+        const duration = 1500;
+        const startTime = performance.now();
+        const isDecimal = target % 1 !== 0;
 
-      setCount(isDecimal ? parseFloat(current.toFixed(1)) : Math.floor(current));
+        const animate = (now: number) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = target * eased;
 
-      if (progress < 1) {
+          setCount(isDecimal ? parseFloat(current.toFixed(1)) : Math.floor(current));
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            setCount(target);
+          }
+        };
+
         requestAnimationFrame(animate);
-      } else {
-        setCount(target);
-      }
-    };
+      },
+      { rootMargin: '-50px' }
+    );
 
-    requestAnimationFrame(animate);
-  }, [isInView, target]);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
 
   const display = target % 1 !== 0 ? count.toFixed(1) : count.toLocaleString('en-IN');
 
