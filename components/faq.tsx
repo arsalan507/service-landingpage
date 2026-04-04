@@ -17,7 +17,7 @@ const faqs = [
   {
     question: 'Is the free plan really free? What\'s the catch?',
     answer:
-      'No catch! Our Starter plan is free forever with up to 5 jobs per day, basic tracking, and digital receipts. We make money when your shop grows and you upgrade to Pro at just ₹499/month. Plus, new workshops get first month at ₹249 — 50% off.',
+      'No catch! Our Starter plan is free forever with 20 jobs/month, 2 mechanics, live tracking, and digital receipts. We make money when your shop grows and you upgrade to Pro at just ₹499/month. Plus, new workshops get first month at ₹249 — 50% off.',
   },
   {
     question: 'How does this help me get more customers?',

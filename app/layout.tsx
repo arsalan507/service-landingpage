@@ -228,7 +228,7 @@ const jsonLd = {
           name: 'Is the free plan really free?',
           acceptedAnswer: {
             '@type': 'Answer',
-            text: 'Yes! Our Starter plan is free forever with up to 20 jobs per month, 2 mechanics, basic tracking, and digital receipts. Pro plan starts at ₹499/month with first month at ₹249.',
+            text: 'Yes! Our Starter plan is free forever with 20 jobs/month, 2 mechanic slots, live tracking, and digital receipts. Pro plan starts at ₹499/month with first month at ₹249 — 50% off.',
           },
         },
         {
