@@ -98,9 +98,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Check email uniqueness
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const emailExists = existingUsers?.users?.some(u => u.email === ownerEmail.toLowerCase());
-    if (emailExists) {
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('email', ownerEmail.toLowerCase())
+      .maybeSingle();
+    if (existingUser) {
       return NextResponse.json({ success: false, error: 'This email is already registered. Please login instead.' }, { status: 409 });
     }
 

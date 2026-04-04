@@ -31,9 +31,13 @@ export async function GET(request: NextRequest) {
 
     if (type === 'email') {
       const email = value.toLowerCase().trim();
-      const { data } = await supabaseAdmin.auth.admin.listUsers();
-      const exists = data?.users?.some(u => u.email === email);
-      return NextResponse.json({ taken: !!exists });
+      // Check users table (linked to auth) instead of listing all auth users
+      const { data } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle();
+      return NextResponse.json({ taken: !!data });
     }
 
     if (type === 'shortcode') {
