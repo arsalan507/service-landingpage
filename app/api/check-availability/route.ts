@@ -1,21 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { RESERVED_SLUGS } from '@/lib/constants';
 
 const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || 'https://service.2xg.in',
+  process.env.SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-// Must match the list in register/route.ts
-const RESERVED_SLUGS = new Set([
-  'admin', 'api', 'login', 'signup', 'register', 'dashboard',
-  'app', 'www', 'help', 'support', 'billing', 'settings',
-  'auth', 'oauth', 'callback', 'webhook', 'webhooks',
-  'static', 'assets', 'public', 'health', 'status',
-]);
+// Simple per-IP rate limit for this endpoint (prevent enumeration)
+const checkLimitMap = new Map<string, { count: number; resetAt: number }>();
+const CHECK_LIMIT = 30; // max 30 checks per minute per IP
+const CHECK_WINDOW = 60_000;
+
+function isCheckLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = checkLimitMap.get(ip);
+  if (!entry || entry.resetAt < now) {
+    checkLimitMap.set(ip, { count: 1, resetAt: now + CHECK_WINDOW });
+    return false;
+  }
+  entry.count++;
+  return entry.count > CHECK_LIMIT;
+}
 
 export async function GET(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+  if (isCheckLimited(ip)) {
+    return NextResponse.json({ taken: false, error: 'rate_limit' }, { status: 429 });
+  }
+
   const type = request.nextUrl.searchParams.get('type');
   const value = request.nextUrl.searchParams.get('value');
 
@@ -26,14 +40,12 @@ export async function GET(request: NextRequest) {
   try {
     if (type === 'slug') {
       const slug = value.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '');
-      if (slug.length < 2) return NextResponse.json({ taken: false });
+      if (slug.length < 3) return NextResponse.json({ taken: false });
 
-      // Check reserved slugs
       if (RESERVED_SLUGS.has(slug)) {
         return NextResponse.json({ taken: true, reason: 'reserved' });
       }
 
-      // Only check active orgs — soft-deleted ones don't block new signups
       const { data } = await supabaseAdmin
         .from('organizations')
         .select('id')
@@ -51,6 +63,7 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('email', email)
         .maybeSingle();
+      // Don't reveal if email exists — just say "taken" without details
       return NextResponse.json({ taken: !!data });
     }
 
