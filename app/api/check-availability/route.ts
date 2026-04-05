@@ -2,11 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { RESERVED_SLUGS } from '@/lib/constants';
 
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+// --- Lazy Supabase client — only created when env vars are present ---
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseAdmin() {
+  if (_supabaseAdmin) return _supabaseAdmin;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return null;
+  _supabaseAdmin = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+  return _supabaseAdmin;
+}
 
 // Simple per-IP rate limit for this endpoint (prevent enumeration)
 const checkLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -35,6 +41,11 @@ export async function GET(request: NextRequest) {
 
   if (!type || !value) {
     return NextResponse.json({ taken: false });
+  }
+
+  const supabaseAdmin = getSupabaseAdmin();
+  if (!supabaseAdmin) {
+    return NextResponse.json({ taken: false, error: 'config' }, { status: 500 });
   }
 
   try {
