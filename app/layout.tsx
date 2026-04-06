@@ -91,7 +91,6 @@ export const metadata: Metadata = {
     canonical: '/',
     languages: {
       'en-IN': '/',
-      'hi-IN': '/',
     },
   },
   openGraph: {

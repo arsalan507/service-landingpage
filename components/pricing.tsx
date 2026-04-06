@@ -52,7 +52,7 @@ const plans = [
     price: { monthly: 0, yearly: 0 },
     priceLabel: 'Custom',
     cta: 'Talk to Us on WhatsApp',
-    ctaLink: 'https://wa.me/919844223174?text=Hi%2C%20I%27m%20interested%20in%202XG%20Enterprise%20plan',
+    ctaLink: 'https://wa.me/919916516507?text=Hi%2C%20I%27m%20interested%20in%202XG%20Enterprise%20plan',
     featured: false,
     badge: null,
     enterprise: true,

@@ -54,7 +54,7 @@ export function CTA() {
           </Link>
 
           <Link
-            href="https://wa.me/919844223174?text=Hi%2C%20I%27m%20interested%20in%202XG%20Service"
+            href="https://wa.me/919916516507?text=Hi%2C%20I%27m%20interested%20in%202XG%20Service"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-full text-sm sm:text-base font-semibold text-gray-800 bg-white hover:bg-gray-50 active:scale-[0.98] transition-all border border-gray-300 shadow-sm"

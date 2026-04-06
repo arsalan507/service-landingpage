@@ -39,14 +39,14 @@ export function Footer() {
             </div>
             <div>
               <h3 className="font-semibold text-white uppercase tracking-wider mb-2">Support</h3>
-              <Link href="mailto:hello@2xg.in" className="block text-gray-500 hover:text-white py-0.5">Contact Us</Link>
-              <Link href="mailto:hello@2xg.in" className="block text-gray-500 hover:text-white py-0.5">Help Center</Link>
+              <Link href="mailto:2xg.hello@gmail.com" className="block text-gray-500 hover:text-white py-0.5">Contact Us</Link>
+              <Link href="mailto:2xg.hello@gmail.com" className="block text-gray-500 hover:text-white py-0.5">Help Center</Link>
             </div>
             <div>
               <h3 className="font-semibold text-white uppercase tracking-wider mb-2">Legal</h3>
               <Link href="/privacy" className="block text-gray-500 hover:text-white py-0.5">Privacy</Link>
-              <Link href="/" className="block text-gray-500 hover:text-white py-0.5">Terms</Link>
-              <Link href="/" className="block text-gray-500 hover:text-white py-0.5">Refunds</Link>
+              <Link href="/terms" className="block text-gray-500 hover:text-white py-0.5">Terms</Link>
+              <Link href="/terms" className="block text-gray-500 hover:text-white py-0.5">Refunds</Link>
             </div>
           </div>
         </div>
@@ -80,16 +80,16 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white text-sm uppercase tracking-widest mb-3">Support</h3>
             <ul className="space-y-2">
-              <li><Link href="mailto:hello@2xg.in" className="text-gray-400 hover:text-white text-sm transition-colors">Contact Us</Link></li>
-              <li><Link href="mailto:hello@2xg.in" className="text-gray-400 hover:text-white text-sm transition-colors">Help Center</Link></li>
+              <li><Link href="mailto:2xg.hello@gmail.com" className="text-gray-400 hover:text-white text-sm transition-colors">Contact Us</Link></li>
+              <li><Link href="mailto:2xg.hello@gmail.com" className="text-gray-400 hover:text-white text-sm transition-colors">Help Center</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold text-white text-sm uppercase tracking-widest mb-3">Legal</h3>
             <ul className="space-y-2">
               <li><Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">Terms</Link></li>
-              <li><Link href="/" className="text-gray-400 hover:text-white text-sm transition-colors">Refund Policy</Link></li>
+              <li><Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">Terms</Link></li>
+              <li><Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">Refund Policy</Link></li>
             </ul>
           </div>
         </div>
